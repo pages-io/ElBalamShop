@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ElBalam Shop | Links</title>
+    
+    <!-- FontAwesome para los íconos de redes sociales -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ========================================================
+           VARIABLES DE COLOR Y DISEÑO (ESTILO APPLE DARK MODE)
+           ======================================================== */
+        :root {
+            --bg-dark: #000000;
+            --glass-bg: rgba(30, 30, 30, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-primary: #F5F5F7;
+            --text-secondary: #86868B;
+            --apple-blue: #0A84FF;
+            --apple-green: #30D158;
+        }
+
+        /* ========================================================
+           ESTILOS GLOBALES
+           ======================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding: 20px;
+        }
+
+        /* ========================================================
+           FONDOS ANIMADOS (ORBES)
+           ======================================================== */
+        .bg-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            transition: transform 0.5s ease-out;
+        }
+
+        .orb-1 {
+            width: 50vw; max-width: 400px; height: 50vw; max-height: 400px;
+            background: #BF5AF2; /* Púrpura Apple */
+            top: -10%; left: -10%;
+            animation: float 14s infinite ease-in-out alternate;
+        }
+
+        .orb-2 {
+            width: 60vw; max-width: 500px; height: 60vw; max-height: 500px;
+            background: #0A84FF; /* Azul Apple */
+            bottom: -15%; right: -10%;
+            animation: float 18s infinite ease-in-out alternate-reverse;
+        }
+
+        .orb-3 {
+            width: 40vw; max-width: 300px; height: 40vw; max-height: 300px;
+            background: #FF2D55; /* Rosa/Rojo Apple */
+            top: 40%; left: 50%;
+            transform: translateX(-50%);
+            animation: float 12s infinite ease-in-out alternate;
+        }
+
+        @keyframes float {
+            0% { margin-top: 0; margin-left: 0; }
+            100% { margin-top: 40px; margin-left: 30px; }
+        }
+
+        /* ========================================================
+           TARJETA PRINCIPAL (GLASSMORFISMO)
+           ======================================================== */
+        .glass-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border);
+            border-radius: 36px;
+            padding: 40px 24px;
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 30px 60px rgba(0, 0, 0, 0.6);
+            text-align: center;
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transform: translateY(30px);
+            opacity: 0;
+        }
+
+        @keyframes fadeUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Botón de Compartir Superior */
+        .share-btn {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .share-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.08);
+        }
+
+        /* Foto de Perfil Premium */
+        .profile-img-wrapper {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 20px;
+        }
+
+        .profile-img-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -4px; right: -4px; bottom: -4px; left: -4px;
+            background: linear-gradient(135deg, #FF2D55, #BF5AF2, #0A84FF);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(12px);
+            opacity: 0.8;
+            animation: pulseGlow 4s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { opacity: 0.6; filter: blur(10px); }
+            100% { opacity: 1; filter: blur(16px); }
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #1C1C1E;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        /* Textos del Negocio */
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        p.description {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        /* Etiquetas de Productos (Píldoras estilo iOS) */
+        .products-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: background 0.3s;
+        }
+        
+        .tag:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ========================================================
+           BOTONES DE ENLACES (ESTILO MENÚ IOS)
+           ======================================================== */
+        .links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .link-btn {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px;
+            border-radius: 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1.05rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .link-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: scale(1.02);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .link-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Cuadrado de ícono interno estilo "Ajustes" de iPhone */
+        .icon-box {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            margin-right: 14px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .instagram-bg { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+        .facebook-bg { background: #1877F2; }
+        .whatsapp-bg { background: var(--apple-green); }
+
+        .chevron {
+            margin-left: auto;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* ========================================================
+           NOTIFICACIÓN TOAST (Estilo alerta Apple)
+           ======================================================== */
+        .toast {
+            position: fixed;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(40, 40, 40, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
+            pointer-events: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        .toast.show {
+            bottom: 40px;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Fondos Abstractos Fluidos -->
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Contenedor Principal Glassmorphism -->
+    <main class="glass-card">
+        
+        <!-- Botón Compartir -->
+        <button class="share-btn" onclick="shareProfile()" aria-label="Compartir perfil">
+            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+        </button>
+
+        <!-- Imagen de Perfil / Logo -->
+        <div class="profile-img-wrapper">
+            <div class="profile-img">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+        </div>
+
+        <!-- Información del Negocio -->
+        <h1>ElBalam Shop</h1>
+        <p class="description">
+            Transformamos tus ideas en realidad con calidad premium. Personaliza tu estilo y destaca.
+        </p>
+
+        <!-- Etiquetas de lo que vendes -->
+        <div class="products-tags">
+            <span class="tag">Tazas</span>
+            <span class="tag">Playeras</span>
+            <span class="tag">Llaveros</span>
+            <span class="tag">Polaroids</span>
+            <span class="tag">Photocards</span>
+            <span class="tag">Stickers</span>
+        </div>
+
+        <!-- Botones de Enlaces -->
+        <nav class="links-container">
+            
+            <!-- Link Instagram -->
+            <a href="https://instagram.com/elbalam.shop" target="_blank" class="link-btn">
+                <div class="icon-box instagram-bg">
+                    <i class="fa-brands fa-instagram"></i>
+                </div>
+                <span>Instagram</span>
+                <i class="fa-solid fa-chevron-right chevron"></i>
+            </a>
+
+            <!-- Link Facebook -->
+            <a href="https://facebook.com/elbalam.shop" target="_blank" class="link-btn">
+                <div class="icon-box facebook-bg">
+                    <i class="fa-brands fa-facebook-f"></i>
+                </div>
+                <span>Facebook</span>
+                <i class="fa-solid fa-chevron-right chevron"></i>
+            </a>
+
+            <!-- Link WhatsApp (Ya preparado con mensaje inicial) -->
+            <a href="https://wa.me/529612581145?text=Hola,%20me%20gustaría%20cotizar%20un%20producto%20personalizado." target="_blank" class="link-btn">
+                <div class="icon-box whatsapp-bg">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </div>
+                <span>WhatsApp</span>
+                <i class="fa-solid fa-chevron-right chevron"></i>
+            </a>
+
+        </nav>
+    </main>
+
+    <!-- Notificación tipo Apple -->
+    <div id="toast" class="toast">Enlace copiado al portapapeles</div>
+
+    <!-- Funcionalidad JavaScript -->
+    <script>
+        // Efecto Parallax sutil en los fondos al mover el ratón (solo escritorio)
+        document.addEventListener('mousemove', (e) => {
+            if(window.innerWidth > 768) {
+                const orbs = document.querySelectorAll('.orb');
+                const x = (e.clientX / window.innerWidth) - 0.5;
+                const y = (e.clientY / window.innerHeight) - 0.5;
+                
+                orbs[0].style.transform = `translate(${x * 50}px, ${y * 50}px)`;
+                orbs[1].style.transform = `translate(${x * -60}px, ${y * -60}px)`;
+                orbs[2].style.transform = `translate(${x * 30}px, ${y * -30}px) translateX(-50%)`;
+            }
+        });
+
+        // Mostrar Notificación Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Función para el botón de compartir
+        function shareProfile() {
+            const url = window.location.href;
+            const shareData = {
+                title: 'Lumina Studio - Productos Personalizados',
+                text: 'Descubre nuestros productos personalizados: Tazas, playeras, llaveros, polaroids y más.',
+                url: url
+            };
+
+            // Intentar usar la API nativa de compartir (Mobile/Safari)
+            if (navigator.share) {
+                navigator.share(shareData).catch((error) => {
+                    console.log('Error compartiendo', error);
+                });
+            } else {
+                // Alternativa: Copiar enlace al portapapeles (Desktop)
+                const textArea = document.createElement("textarea");
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Enlace copiado al portapapeles');
+                } catch (err) {
+                    showToast('Error al copiar el enlace');
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+    </script>
+</body>
+</html>
