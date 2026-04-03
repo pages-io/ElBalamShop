@@ -69,25 +69,11 @@
             transition: transform 0.5s ease-out;
         }
 
-        .orb-1 {
-            width: 50vw; max-width: 400px; height: 50vw; max-height: 400px;
-            background: #BF5AF2; /* Púrpura Apple */
-            top: -10%; left: -10%;
-            animation: float 14s infinite ease-in-out alternate;
-        }
-
-        .orb-2 {
-            width: 60vw; max-width: 500px; height: 60vw; max-height: 500px;
-            background: #0A84FF; /* Azul Apple */
-            bottom: -15%; right: -10%;
-            animation: float 18s infinite ease-in-out alternate-reverse;
-        }
-
-        .orb-3 {
-            width: 40vw; max-width: 300px; height: 40vw; max-height: 300px;
-            background: #FF2D55; /* Rosa/Rojo Apple */
-            top: 40%; left: 50%;
-            transform: translateX(-50%);
+        .orb-center {
+            width: 70vw; max-width: 500px; height: 70vw; max-height: 500px;
+            background: linear-gradient(135deg, #BF5AF2, #0A84FF); /* Degradado suave para mantener el estilo */
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
             animation: float 12s infinite ease-in-out alternate;
         }
 
@@ -322,9 +308,7 @@
 
     <!-- Fondos Abstractos Fluidos -->
     <div class="bg-orbs">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
+        <div class="orb orb-center"></div>
     </div>
 
     <!-- Contenedor Principal Glassmorphism -->
@@ -399,13 +383,13 @@
         // Efecto Parallax sutil en los fondos al mover el ratón (solo escritorio)
         document.addEventListener('mousemove', (e) => {
             if(window.innerWidth > 768) {
-                const orbs = document.querySelectorAll('.orb');
-                const x = (e.clientX / window.innerWidth) - 0.5;
-                const y = (e.clientY / window.innerHeight) - 0.5;
-                
-                orbs[0].style.transform = `translate(${x * 50}px, ${y * 50}px)`;
-                orbs[1].style.transform = `translate(${x * -60}px, ${y * -60}px)`;
-                orbs[2].style.transform = `translate(${x * 30}px, ${y * -30}px) translateX(-50%)`;
+                const orb = document.querySelector('.orb-center');
+                if (orb) {
+                    const x = (e.clientX / window.innerWidth) - 0.5;
+                    const y = (e.clientY / window.innerHeight) - 0.5;
+                    
+                    orb.style.transform = `translate(calc(-50% + ${x * 50}px), calc(-50% + ${y * 50}px))`;
+                }
             }
         });
 
@@ -423,7 +407,7 @@
         function shareProfile() {
             const url = window.location.href;
             const shareData = {
-                title: 'Lumina Studio - Productos Personalizados',
+                title: 'ElBalam Shop - Productos Personalizados',
                 text: 'Descubre nuestros productos personalizados: Tazas, playeras, llaveros, polaroids y más.',
                 url: url
             };
