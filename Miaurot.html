@@ -220,7 +220,7 @@
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- FIREBASE CONFIG (Github Direct Version) ---
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyCRSUezzXCAOo33o5Q49VeWMhPqNpZBCfM",
             authDomain: "miaurot-cards-elbalamshop.firebaseapp.com",
@@ -580,20 +580,21 @@
 
         const renderAdminCartas = (tab) => {
             const cards = [...window.state.db.cards].sort((a,b) => a.number - b.number);
+            // Grid de 2 columnas en movil (grid-cols-2), resto en PC
             tab.innerHTML = `
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <div onclick="openCardModal()" class="glass-card aspect-[2/3] flex flex-col items-center justify-center cursor-pointer border-dashed border-2 text-white/30"><i data-lucide="plus" class="w-12 h-12 mb-2"></i><span>Agregar Carta</span></div>
+                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    <div onclick="openCardModal()" class="glass-card aspect-[2/3] flex flex-col items-center justify-center cursor-pointer border-dashed border-2 text-white/30 min-h-[150px]"><i data-lucide="plus" class="w-8 h-8 md:w-12 md:h-12 mb-2"></i><span class="text-xs md:text-sm">Agregar</span></div>
                     ${cards.map((c, i) => {
                         const usedInThisCard = window.state.db.usedCodes.filter(u => c.validCodes.includes(u.code)).length;
                         return `
-                        <div onclick="openCardAuditModal('${c.id}')" class="glass-card aspect-[2/3] relative group overflow-hidden flex flex-col p-4 cursor-pointer">
-                            <div class="absolute top-3 right-3 z-10 glass bg-white/10 px-2 py-1 text-[10px] font-bold border border-white/10 text-white">${usedInThisCard}/${c.validCodes.length}</div>
+                        <div onclick="openCardAuditModal('${c.id}')" class="glass-card aspect-[2/3] relative group overflow-hidden flex flex-col p-2 md:p-4 cursor-pointer">
+                            <div class="absolute top-2 right-2 md:top-3 md:right-3 z-10 glass bg-white/10 px-1.5 py-0.5 md:px-2 md:py-1 text-[8px] md:text-[10px] font-bold border border-white/10 text-white">${usedInThisCard}/${c.validCodes.length}</div>
                             <img src="${c.image}" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded-xl" onerror="this.src='https://placehold.co/400x600?text=Link+Invalido'">
-                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-4">
-                                <button onclick="event.stopPropagation(); openCardModal(${i})" class="p-2 bg-white text-black rounded-full shadow-lg"><i data-lucide="edit-2" class="w-5 h-5"></i></button>
-                                <button onclick="event.stopPropagation(); deleteCard(${i})" class="p-2 bg-red-500 text-white rounded-full shadow-lg"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2 md:gap-4">
+                                <button onclick="event.stopPropagation(); openCardModal(${i})" class="p-1.5 md:p-2 bg-white text-black rounded-full shadow-lg"><i data-lucide="edit-2" class="w-4 h-4 md:w-5 md:h-5"></i></button>
+                                <button onclick="event.stopPropagation(); deleteCard(${i})" class="p-1.5 md:p-2 bg-red-500 text-white rounded-full shadow-lg"><i data-lucide="trash-2" class="w-4 h-4 md:w-5 md:h-5"></i></button>
                             </div>
-                            <div class="absolute bottom-3 left-3 z-10 glass bg-white/10 px-2 py-1 text-[10px] font-bold border border-white/10 text-white max-w-[85%] truncate">#${c.number} ${c.name}</div>
+                            <div class="absolute bottom-2 left-2 md:bottom-3 md:left-3 z-10 glass bg-white/10 px-1.5 py-0.5 md:px-2 md:py-1 text-[8px] md:text-[10px] font-bold border border-white/10 text-white max-w-[90%] truncate">#${c.number} ${c.name}</div>
                         </div>`;
                     }).join('')}
                 </div>`;
@@ -679,16 +680,24 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-white">
                     <div>
                         <h2 class="text-4xl font-bold mb-4">Hola, ${window.state.loggedUser.name.split(' ')[0]}</h2>
-                        <p class="text-lg opacity-70 mb-8 leading-relaxed italic text-white/80">
+                        <p class="text-lg opacity-70 mb-6 leading-relaxed italic text-white/80">
                             "Miaurot" es un ecosistema exclusivo diseñado para recompensar tu fidelidad. 
                             Cada compra te otorga códigos especiales que puedes transformar en cartas únicas. 
                             Colecciónalas y canjea tus logros por regalos diseñados para ti.
                         </p>
-                        <div class="flex gap-4 mb-10">
+
+                        <!-- Carrusel Móvil (Pequeño, solo visible en celulares) -->
+                        <div class="flex md:hidden justify-center mb-8">
+                            <div class="glass-card p-2 w-40 rotate-1 shadow-xl">
+                                <img class="slideshow-img w-full aspect-[2/3] object-cover rounded-lg" src="${availableCards.length > 0 ? availableCards[0].image : ''}" referrerpolicy="no-referrer">
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 md:gap-4 mb-10 overflow-x-auto pb-2">
                             ${Array(5).fill(0).map((_, i) => {
                                 const slotId = window.state.loggedUser.activeSlots?.[i]?.id;
                                 const fresh = slotId ? window.state.db.cards.find(x => String(x.id) === String(slotId)) : null;
-                                return `<div class="w-full aspect-[2/3] glass-card flex items-center justify-center border border-white/10 overflow-hidden">${fresh ? `<img src="${fresh.image}" referrerpolicy="no-referrer" class="w-full h-full object-cover">` : '<i data-lucide="sparkles" class="opacity-10 text-white"></i>'}</div>`;
+                                return `<div class="min-w-[60px] md:w-full aspect-[2/3] glass-card flex items-center justify-center border border-white/10 overflow-hidden rounded-xl">${fresh ? `<img src="${fresh.image}" referrerpolicy="no-referrer" class="w-full h-full object-cover">` : '<i data-lucide="sparkles" class="opacity-10 text-white w-4 h-4"></i>'}</div>`;
                             }).join('')}
                         </div>
                         <div class="flex gap-4">
@@ -696,8 +705,12 @@
                         </div>
                         ${(window.state.loggedUser.activeSlots || []).length === 5 ? '<p class="mt-4 text-green-400 font-bold fade-in">¡Completado! Ve a la pestaña de Regalos.</p>' : ''}
                     </div>
+                    
+                    <!-- Carrusel PC (Visible solo en computadoras) -->
                     <div class="hidden md:flex flex-col items-center justify-center">
-                        <div class="glass-card p-4 w-64 rotate-3"><img id="slideshow-img" src="${availableCards.length > 0 ? availableCards[0].image : ''}" referrerpolicy="no-referrer" class="w-full aspect-[2/3] object-cover rounded-lg shadow-2xl transition-opacity duration-500"></div>
+                        <div class="glass-card p-4 w-64 rotate-3">
+                            <img class="slideshow-img w-full aspect-[2/3] object-cover rounded-lg shadow-2xl transition-opacity duration-500" src="${availableCards.length > 0 ? availableCards[0].image : ''}" referrerpolicy="no-referrer">
+                        </div>
                     </div>
                 </div>`;
             
@@ -707,11 +720,16 @@
                     const cards = window.state.db.cards;
                     if (cards.length === 0) return;
                     currentSlideshowIndex = (currentSlideshowIndex + 1) % cards.length;
-                    const img = document.getElementById('slideshow-img');
-                    if (img && cards[currentSlideshowIndex]) { 
-                        img.style.opacity = '0'; 
-                        setTimeout(() => { if(img) { img.src = cards[currentSlideshowIndex].image; img.style.opacity = '1'; } }, 500); 
-                    }
+                    const imgs = document.querySelectorAll('.slideshow-img');
+                    imgs.forEach(img => {
+                        img.style.opacity = '0';
+                        setTimeout(() => { 
+                            if(img) { 
+                                img.src = cards[currentSlideshowIndex].image; 
+                                img.style.opacity = '1'; 
+                            } 
+                        }, 500);
+                    });
                 }, 5000);
             }
         };
@@ -722,11 +740,11 @@
             const count = cards.filter(c => ownedIds.includes(String(c.id))).length;
             
             tab.innerHTML = `
-                <div class="flex justify-between items-center mb-8 text-white">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 text-white gap-4">
                     <h2 class="text-2xl font-bold">Tu Galería</h2>
-                    <span class="text-sm font-bold bg-white/10 px-4 py-2 rounded-full border border-white/10">Cartas desbloqueadas [${count}/${cards.length}]</span>
+                    <span class="text-xs md:text-sm font-bold bg-white/10 px-4 py-2 rounded-full border border-white/10">Cartas desbloqueadas [${count}/${cards.length}]</span>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6">
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
                     ${cards.map(c => {
                         const owned = ownedIds.includes(String(c.id));
                         return `<div><div class="glass-card aspect-[2/3] overflow-hidden mb-2 ${owned ? '' : 'card-locked'}"><img src="${c.image}" referrerpolicy="no-referrer" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x600?text=Card'"></div><p class="text-[10px] text-center opacity-40 uppercase tracking-widest text-white">#${c.number} ${c.name}</p></div>`;
