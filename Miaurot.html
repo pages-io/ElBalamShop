@@ -189,7 +189,9 @@
     </nav>
 
     <main id="main-content" class="flex-grow container mx-auto px-6 py-8">
-        <!-- Contenido dinámico -->
+        <div class="flex items-center justify-center h-full py-20 opacity-20 text-white">
+            <div class="text-xl">Sincronizando con Miaurot Cloud...</div>
+        </div>
     </main>
 
     <footer class="mt-auto py-12 px-6 border-t border-white/10 glass mx-4 mb-4 rounded-3xl text-white">
@@ -218,7 +220,7 @@
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- FIREBASE CONFIG ---
+        // --- CONFIGURACIÓN HARDCODED PARA GITHUB ---
         const firebaseConfig = {
             apiKey: "AIzaSyCRSUezzXCAOo33o5Q49VeWMhPqNpZBCfM",
             authDomain: "miaurot-cards-elbalamshop.firebaseapp.com",
@@ -232,9 +234,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const appId = 'miaurot-cards-prod';
+        const appId = 'miaurot-v1';
 
-        // --- STATE ---
+        // --- ESTADO GLOBAL ---
         window.state = {
             role: 'client',
             currentTab: 'inicio',
@@ -246,7 +248,7 @@
         let slideshowTimer = null;
         let currentSlideshowIndex = 0;
 
-        // --- GLOBAL FUNCTIONS FOR HTML ---
+        // --- FUNCIONES GLOBALES ---
         window.switchRole = (role) => {
             window.state.role = role;
             window.state.currentTab = role === 'admin' ? 'registro' : (window.state.loggedUser ? 'inicio' : 'inicio');
@@ -258,9 +260,7 @@
             render();
         };
 
-        window.closeModal = () => {
-            document.getElementById('modal-container').classList.add('hidden');
-        };
+        window.closeModal = () => document.getElementById('modal-container').classList.add('hidden');
 
         const openModal = (html) => {
             const container = document.getElementById('modal-container');
@@ -306,53 +306,54 @@
             window.showToast("ID copiado al portapapeles");
         };
 
-        // --- AUTH & LISTENERS ---
-        signInAnonymously(auth).catch(err => console.error("Firebase Auth Error:", err));
-
-        onAuthStateChanged(auth, (user) => {
-            window.state.user = user;
-            if (user) {
-                setupListeners();
-                checkSession();
-            } else {
-                render(); // Render base if not logged yet
-            }
-        });
-
+        // --- FIREBASE SYNC ---
         const setupListeners = () => {
             const rootPath = `artifacts/${appId}/public/data/`;
             
+            // Sincronización de Clientes
             onSnapshot(collection(db, rootPath + 'clients'), (snap) => {
                 window.state.db.clients = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-                if (window.state.loggedUser) {
-                    const fresh = window.state.db.clients.find(c => String(c.id) === String(window.state.loggedUser.id));
-                    if (fresh) window.state.loggedUser = fresh;
+                const sid = localStorage.getItem('miaurot_session_id');
+                if (sid) {
+                    const found = window.state.db.clients.find(c => String(c.id) === String(sid));
+                    if (found) window.state.loggedUser = found;
                 }
                 render();
             });
 
+            // Sincronización de Cartas
             onSnapshot(collection(db, rootPath + 'cards'), (snap) => {
                 window.state.db.cards = snap.docs.map(d => ({ ...d.data(), id: d.id }));
                 render();
             });
 
+            // Sincronización de Regalos
             onSnapshot(collection(db, rootPath + 'gifts'), (snap) => {
                 window.state.db.gifts = snap.docs.map(d => ({ ...d.data(), id: d.id }));
                 render();
             });
 
+            // Sincronización de Códigos
             onSnapshot(collection(db, rootPath + 'usedCodes'), (snap) => {
                 window.state.db.usedCodes = snap.docs.map(d => d.data());
                 render();
             });
         };
 
-        const checkSession = () => {
-            const sid = localStorage.getItem('miaurot_session_id');
-            if (sid) {
-                window.state.currentTab = 'inicio';
+        // --- AUTH ---
+        signInAnonymously(auth).catch(err => {
+            console.error("Firebase Auth Error:", err);
+            window.showToast("Error de conexión con la base de datos", "error");
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            window.state.user = user;
+            if (user) {
+                setupListeners();
+            } else {
+                render();
             }
-        };
+        });
 
         // --- DATABASE ACTIONS ---
         window.saveUser = async (index) => {
@@ -368,17 +369,17 @@
             if (index === null) {
                 document.getElementById('new-id').innerText = clientId;
                 document.getElementById('id-display').classList.remove('hidden');
-                window.showToast("Registrado");
+                window.showToast("Registrado con éxito");
             } else {
-                window.showToast("Actualizado");
+                window.showToast("Actualizado correctamente");
                 window.closeModal();
             }
         };
 
         window.deleteClient = (i) => {
-            window.showConfirm("¿Eliminar cliente?", "Se borrará su progreso.", async () => {
+            window.showConfirm("¿Eliminar cliente?", "Se borrará permanentemente su progreso.", async () => {
                 await deleteDoc(doc(db, `artifacts/${appId}/public/data/clients/${window.state.db.clients[i].id}`));
-                window.showToast("Eliminado", "error");
+                window.showToast("Cliente eliminado", "error");
             });
         };
 
@@ -387,18 +388,18 @@
             const number = parseInt(document.getElementById('c-num').value);
             const image = document.getElementById('c-url').value;
             const validCodes = document.getElementById('c-codes').value.split('\n').map(x => x.trim().toUpperCase()).filter(x => x);
-            if(!name || !number || !image) { window.showToast("Faltan datos", "error"); return; }
+            if(!name || !number || !image) { window.showToast("Faltan datos de la carta", "error"); return; }
             
             const cardId = index !== null ? window.state.db.cards[index].id : Date.now().toString();
             await setDoc(doc(db, `artifacts/${appId}/public/data/cards/${cardId}`), { name, number, image, validCodes });
-            window.showToast("Guardado");
+            window.showToast("Carta guardada");
             window.closeModal();
         };
 
         window.deleteCard = (i) => {
-            window.showConfirm("¿Eliminar carta?", "Anulará códigos.", async () => {
+            window.showConfirm("¿Eliminar carta?", "Se anularán todos sus códigos.", async () => {
                 await deleteDoc(doc(db, `artifacts/${appId}/public/data/cards/${window.state.db.cards[i].id}`));
-                window.showToast("Eliminado", "error");
+                window.showToast("Carta eliminada", "error");
             });
         };
 
@@ -410,14 +411,14 @@
             
             const giftId = index !== null ? window.state.db.gifts[index].id : Date.now().toString();
             await setDoc(doc(db, `artifacts/${appId}/public/data/gifts/${giftId}`), { name, image, stock });
-            window.showToast("Guardado");
+            window.showToast("Regalo guardado");
             window.closeModal();
         };
 
         window.deleteGift = (i) => {
-            window.showConfirm("¿Eliminar regalo?", "No estará disponible.", async () => {
+            window.showConfirm("¿Eliminar regalo?", "Ya no aparecerá en el catálogo.", async () => {
                 await deleteDoc(doc(db, `artifacts/${appId}/public/data/gifts/${window.state.db.gifts[i].id}`));
-                window.showToast("Eliminado", "error");
+                window.showToast("Regalo eliminado", "error");
             });
         };
 
@@ -434,7 +435,7 @@
         };
 
         window.logout = () => {
-            window.showConfirm("¿Cerrar sesión?", "¿Estás seguro?", () => {
+            window.showConfirm("¿Cerrar sesión?", "¿Estás seguro de que deseas salir?", () => {
                 if (slideshowTimer) clearInterval(slideshowTimer);
                 window.state.loggedUser = null;
                 localStorage.removeItem('miaurot_session_id');
@@ -447,7 +448,7 @@
         window.handleRegisterCard = async () => {
             const code = document.getElementById('c-code-input').value.trim().toUpperCase();
             if(!code) return;
-            if(window.state.db.usedCodes.some(u => u.code === code)) { window.showToast("Código ya usado", "error"); return; }
+            if(window.state.db.usedCodes.some(u => u.code === code)) { window.showToast("Código ya usado anteriormente", "error"); return; }
             
             const card = window.state.db.cards.find(c => c.validCodes.includes(code));
             if(card) {
@@ -457,12 +458,14 @@
                 if (!updatedUser.activeSlots) updatedUser.activeSlots = [];
                 if (!updatedUser.collection) updatedUser.collection = [];
                 
+                // Añadir al slot (sincronizado por ID)
                 updatedUser.activeSlots.push({ id: String(card.id) });
                 
+                // Sincronización robusta de Colección (IDs como String)
                 const cardIdStr = String(card.id);
-                const currentCollection = new Set((updatedUser.collection || []).map(String));
-                currentCollection.add(cardIdStr);
-                updatedUser.collection = Array.from(currentCollection);
+                if (!updatedUser.collection.map(String).includes(cardIdStr)) {
+                    updatedUser.collection.push(cardIdStr);
+                }
                 
                 await setDoc(doc(db, `artifacts/${appId}/public/data/clients/${updatedUser.id}`), updatedUser);
                 const usageId = `${code}_${updatedUser.id}`;
@@ -499,14 +502,10 @@
             return `EBSCF${month}${day}${initials}${random}`;
         };
 
-        // --- RENDER FUNCTIONS ---
+        // --- RENDER LOGIC ---
         const render = () => {
             const main = document.getElementById('main-content');
             if(!main) return;
-
-            // Nav active state
-            document.getElementById('btn-admin').className = `flex items-center gap-2 p-3 rounded-full transition ${window.state.role === 'admin' ? 'bg-white text-black shadow-lg shadow-white/10' : 'hover:bg-white/10 text-white'}`;
-            document.getElementById('btn-client').className = `flex items-center gap-2 p-3 rounded-full transition ${window.state.role === 'client' ? 'bg-white text-black shadow-lg shadow-white/10' : 'hover:bg-white/10 text-white'}`;
 
             if (window.state.role === 'admin') {
                 renderAdmin(main);
@@ -552,7 +551,7 @@
                                     <td>
                                         <div class="flex items-center gap-2">
                                             <div class="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden"><div class="h-full bg-white transition-all duration-500" style="width: ${((c.activeSlots?.length || 0)/5)*100}%"></div></div>
-                                            <span class="text-xs opacity-50 font-bold">${c.activeSlots?.length || 0}/5</span>
+                                            <span class="text-xs text-white opacity-50 font-bold">${c.activeSlots?.length || 0}/5</span>
                                         </div>
                                     </td>
                                     <td>${c.activeSlots?.length === 5 ? '<span class="text-[10px] bg-green-500/20 text-green-400 px-2 py-1 rounded-full border border-green-500/30 font-bold uppercase">Listo</span>' : '<span class="text-[10px] bg-white/5 text-white/40 px-2 py-1 rounded-full border border-white/10 font-bold uppercase">Activo</span>'}</td>
@@ -730,7 +729,7 @@
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6">
                     ${cards.map(c => {
                         const owned = ownedIds.includes(String(c.id));
-                        return `<div><div class="glass-card aspect-[2/3] overflow-hidden mb-2 ${owned ? '' : 'card-locked'}"><img src="${c.image}" class="w-full h-full object-cover"></div><p class="text-[10px] text-center opacity-40 uppercase tracking-widest text-white">#${c.number} ${c.name}</p></div>`;
+                        return `<div><div class="glass-card aspect-[2/3] overflow-hidden mb-2 ${owned ? '' : 'card-locked'}"><img src="${c.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x600?text=Card'"></div><p class="text-[10px] text-center opacity-40 uppercase tracking-widest text-white">#${c.number} ${c.name}</p></div>`;
                     }).join('')}
                 </div>`;
         };
@@ -750,9 +749,7 @@
                 </div>`;
         };
 
-        // Render base UI immediately
         render();
-
     </script>
 </body>
 </html>
