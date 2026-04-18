@@ -190,7 +190,7 @@
 
     <main id="main-content" class="flex-grow container mx-auto px-6 py-8">
         <div class="flex items-center justify-center h-full py-20 opacity-20 text-white">
-            <div class="text-xl">Sincronizando con Miaurot Cloud...</div>
+            <div class="text-xl">Conectando con Miaurot Cloud...</div>
         </div>
     </main>
 
@@ -220,7 +220,7 @@
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- CONFIGURACIÓN HARDCODED PARA GITHUB ---
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyCRSUezzXCAOo33o5Q49VeWMhPqNpZBCfM",
             authDomain: "miaurot-cards-elbalamshop.firebaseapp.com",
@@ -234,9 +234,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const appId = 'miaurot-v1';
+        const appId = 'miaurot-cards-prod';
 
-        // --- ESTADO GLOBAL ---
+        // --- STATE ---
         window.state = {
             role: 'client',
             currentTab: 'inicio',
@@ -248,7 +248,7 @@
         let slideshowTimer = null;
         let currentSlideshowIndex = 0;
 
-        // --- FUNCIONES GLOBALES ---
+        // --- GLOBAL FUNCTIONS ---
         window.switchRole = (role) => {
             window.state.role = role;
             window.state.currentTab = role === 'admin' ? 'registro' : (window.state.loggedUser ? 'inicio' : 'inicio');
@@ -306,11 +306,10 @@
             window.showToast("ID copiado al portapapeles");
         };
 
-        // --- FIREBASE SYNC ---
+        // --- SYNC ---
         const setupListeners = () => {
             const rootPath = `artifacts/${appId}/public/data/`;
             
-            // Sincronización de Clientes
             onSnapshot(collection(db, rootPath + 'clients'), (snap) => {
                 window.state.db.clients = snap.docs.map(d => ({ ...d.data(), id: d.id }));
                 const sid = localStorage.getItem('miaurot_session_id');
@@ -321,33 +320,28 @@
                 render();
             });
 
-            // Sincronización de Cartas
             onSnapshot(collection(db, rootPath + 'cards'), (snap) => {
                 window.state.db.cards = snap.docs.map(d => ({ ...d.data(), id: d.id }));
                 render();
             });
 
-            // Sincronización de Regalos
             onSnapshot(collection(db, rootPath + 'gifts'), (snap) => {
                 window.state.db.gifts = snap.docs.map(d => ({ ...d.data(), id: d.id }));
                 render();
             });
 
-            // Sincronización de Códigos
             onSnapshot(collection(db, rootPath + 'usedCodes'), (snap) => {
                 window.state.db.usedCodes = snap.docs.map(d => d.data());
                 render();
             });
         };
 
-        // --- AUTH ---
         signInAnonymously(auth).catch(err => {
-            console.error("Firebase Auth Error:", err);
-            window.showToast("Error de conexión con la base de datos", "error");
+            console.error(err);
+            window.showToast("Error de conexión", "error");
         });
 
         onAuthStateChanged(auth, (user) => {
-            window.state.user = user;
             if (user) {
                 setupListeners();
             } else {
@@ -369,17 +363,17 @@
             if (index === null) {
                 document.getElementById('new-id').innerText = clientId;
                 document.getElementById('id-display').classList.remove('hidden');
-                window.showToast("Registrado con éxito");
+                window.showToast("Registrado");
             } else {
-                window.showToast("Actualizado correctamente");
+                window.showToast("Actualizado");
                 window.closeModal();
             }
         };
 
         window.deleteClient = (i) => {
-            window.showConfirm("¿Eliminar cliente?", "Se borrará permanentemente su progreso.", async () => {
+            window.showConfirm("¿Eliminar cliente?", "Se borrará su progreso.", async () => {
                 await deleteDoc(doc(db, `artifacts/${appId}/public/data/clients/${window.state.db.clients[i].id}`));
-                window.showToast("Cliente eliminado", "error");
+                window.showToast("Eliminado", "error");
             });
         };
 
@@ -388,18 +382,18 @@
             const number = parseInt(document.getElementById('c-num').value);
             const image = document.getElementById('c-url').value;
             const validCodes = document.getElementById('c-codes').value.split('\n').map(x => x.trim().toUpperCase()).filter(x => x);
-            if(!name || !number || !image) { window.showToast("Faltan datos de la carta", "error"); return; }
+            if(!name || !number || !image) { window.showToast("Faltan datos", "error"); return; }
             
             const cardId = index !== null ? window.state.db.cards[index].id : Date.now().toString();
             await setDoc(doc(db, `artifacts/${appId}/public/data/cards/${cardId}`), { name, number, image, validCodes });
-            window.showToast("Carta guardada");
+            window.showToast("Guardado");
             window.closeModal();
         };
 
         window.deleteCard = (i) => {
-            window.showConfirm("¿Eliminar carta?", "Se anularán todos sus códigos.", async () => {
+            window.showConfirm("¿Eliminar carta?", "Anulará códigos.", async () => {
                 await deleteDoc(doc(db, `artifacts/${appId}/public/data/cards/${window.state.db.cards[i].id}`));
-                window.showToast("Carta eliminada", "error");
+                window.showToast("Eliminado", "error");
             });
         };
 
@@ -411,14 +405,14 @@
             
             const giftId = index !== null ? window.state.db.gifts[index].id : Date.now().toString();
             await setDoc(doc(db, `artifacts/${appId}/public/data/gifts/${giftId}`), { name, image, stock });
-            window.showToast("Regalo guardado");
+            window.showToast("Guardado");
             window.closeModal();
         };
 
         window.deleteGift = (i) => {
-            window.showConfirm("¿Eliminar regalo?", "Ya no aparecerá en el catálogo.", async () => {
+            window.showConfirm("¿Eliminar regalo?", "Ya no aparecerá.", async () => {
                 await deleteDoc(doc(db, `artifacts/${appId}/public/data/gifts/${window.state.db.gifts[i].id}`));
-                window.showToast("Regalo eliminado", "error");
+                window.showToast("Eliminado", "error");
             });
         };
 
@@ -435,7 +429,7 @@
         };
 
         window.logout = () => {
-            window.showConfirm("¿Cerrar sesión?", "¿Estás seguro de que deseas salir?", () => {
+            window.showConfirm("¿Cerrar sesión?", "¿Estás seguro?", () => {
                 if (slideshowTimer) clearInterval(slideshowTimer);
                 window.state.loggedUser = null;
                 localStorage.removeItem('miaurot_session_id');
@@ -448,70 +442,54 @@
         window.handleRegisterCard = async () => {
             const code = document.getElementById('c-code-input').value.trim().toUpperCase();
             if(!code) return;
-            if(window.state.db.usedCodes.some(u => u.code === code)) { window.showToast("Código ya usado anteriormente", "error"); return; }
+            if(window.state.db.usedCodes.some(u => u.code === code)) { window.showToast("Código ya usado", "error"); return; }
             
             const card = window.state.db.cards.find(c => c.validCodes.includes(code));
             if(card) {
-                if((window.state.loggedUser.activeSlots || []).length >= 5) { window.showToast("¡Tus 5 slots ya están llenos!", "error"); return; }
+                if((window.state.loggedUser.activeSlots || []).length >= 5) { window.showToast("Slots llenos", "error"); return; }
                 
                 const updatedUser = { ...window.state.loggedUser };
                 if (!updatedUser.activeSlots) updatedUser.activeSlots = [];
                 if (!updatedUser.collection) updatedUser.collection = [];
                 
-                // Añadir al slot (sincronizado por ID)
                 updatedUser.activeSlots.push({ id: String(card.id) });
                 
-                // Sincronización robusta de Colección (IDs como String)
                 const cardIdStr = String(card.id);
-                if (!updatedUser.collection.map(String).includes(cardIdStr)) {
-                    updatedUser.collection.push(cardIdStr);
-                }
+                const currentCollection = new Set((updatedUser.collection || []).map(String));
+                currentCollection.add(cardIdStr);
+                updatedUser.collection = Array.from(currentCollection);
                 
                 await setDoc(doc(db, `artifacts/${appId}/public/data/clients/${updatedUser.id}`), updatedUser);
                 const usageId = `${code}_${updatedUser.id}`;
                 await setDoc(doc(db, `artifacts/${appId}/public/data/usedCodes/${usageId}`), { code, userId: updatedUser.id });
                 
-                window.showToast("Carta registrada con éxito");
+                window.showToast("Registrada");
                 document.getElementById('c-code-input').value = '';
-            } else window.showToast("El código ingresado es inválido", "error");
+            } else window.showToast("Código inválido", "error");
         };
 
         window.claimGift = async (index) => {
             const g = window.state.db.gifts[index];
-            if((window.state.loggedUser.activeSlots || []).length < 5) { window.showToast("Necesitas registrar 5 cartas primero", "error"); return; }
-            if(g.stock <= 0) { window.showToast("Este regalo no tiene existencias", "error"); return; }
+            if((window.state.loggedUser.activeSlots || []).length < 5) { window.showToast("Registra 5 cartas primero", "error"); return; }
+            if(g.stock <= 0) { window.showToast("Sin existencias", "error"); return; }
             
-            window.showConfirm("¿Confirmar canje?", `¿Deseas canjear tus 5 cartas por "${g.name}"?`, async () => {
+            window.showConfirm("¿Confirmar canje?", `¿Canjear por "${g.name}"?`, async () => {
                 const updatedGift = { ...g, stock: g.stock - 1 };
                 const updatedUser = { ...window.state.loggedUser, activeSlots: [] };
                 
                 await setDoc(doc(db, `artifacts/${appId}/public/data/gifts/${g.id}`), updatedGift);
                 await setDoc(doc(db, `artifacts/${appId}/public/data/clients/${updatedUser.id}`), updatedUser);
                 
-                window.showToast("¡Felicidades! Regalo reclamado");
+                window.showToast("¡Felicidades!");
             });
-        };
-
-        // --- HELPERS ---
-        const generateClientID = (name, dob) => {
-            const date = new Date(dob);
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const initials = name.split(' ').map(n => n[0] || '').join('').toUpperCase();
-            const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-            return `EBSCF${month}${day}${initials}${random}`;
         };
 
         // --- RENDER LOGIC ---
         const render = () => {
             const main = document.getElementById('main-content');
             if(!main) return;
-
-            if (window.state.role === 'admin') {
-                renderAdmin(main);
-            } else {
-                renderClient(main);
-            }
+            if (window.state.role === 'admin') renderAdmin(main);
+            else renderClient(main);
             lucide.createIcons();
         };
 
@@ -536,25 +514,24 @@
         const renderAdminRegistro = (tab) => {
             tab.innerHTML = `
                 <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-2xl font-bold">Base de Datos de Clientes</h2>
+                    <h2 class="text-2xl font-bold">Base de Datos</h2>
                     <button onclick="openUserModal()" class="btn-apple"><i data-lucide="user-plus" class="w-4 h-4"></i> Registrar Usuario</button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="client-table">
-                        <thead><tr><th>Nombre / ID</th><th>Contacto</th><th>Progreso</th><th>Estado</th><th>Acción</th></tr></thead>
+                        <thead><tr><th>Nombre / ID</th><th>Contacto</th><th>Progreso</th><th>Acción</th></tr></thead>
                         <tbody>
-                            ${window.state.db.clients.length === 0 ? '<tr><td colspan="5" class="text-center opacity-30 py-12">No hay clientes en la nube.</td></tr>' : 
+                            ${window.state.db.clients.length === 0 ? '<tr><td colspan="4" class="text-center opacity-30 py-12">No hay datos.</td></tr>' : 
                                 window.state.db.clients.map((c, i) => `
                                 <tr>
-                                    <td><div class="font-medium text-white">${c.name}</div><div class="text-[10px] font-mono opacity-40 tracking-wider">${c.id}</div></td>
-                                    <td class="text-sm opacity-70 text-white">${c.phone}<br><span class="text-[10px] opacity-50">${c.dob}</span></td>
+                                    <td><div class="font-medium text-white">${c.name}</div><div class="text-[10px] font-mono opacity-40">${c.id}</div></td>
+                                    <td class="text-sm opacity-70 text-white">${c.phone}</td>
                                     <td>
                                         <div class="flex items-center gap-2">
-                                            <div class="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden"><div class="h-full bg-white transition-all duration-500" style="width: ${((c.activeSlots?.length || 0)/5)*100}%"></div></div>
-                                            <span class="text-xs text-white opacity-50 font-bold">${c.activeSlots?.length || 0}/5</span>
+                                            <div class="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden"><div class="h-full bg-white" style="width: ${((c.activeSlots?.length || 0)/5)*100}%"></div></div>
+                                            <span class="text-xs font-bold">${c.activeSlots?.length || 0}/5</span>
                                         </div>
                                     </td>
-                                    <td>${c.activeSlots?.length === 5 ? '<span class="text-[10px] bg-green-500/20 text-green-400 px-2 py-1 rounded-full border border-green-500/30 font-bold uppercase">Listo</span>' : '<span class="text-[10px] bg-white/5 text-white/40 px-2 py-1 rounded-full border border-white/10 font-bold uppercase">Activo</span>'}</td>
                                     <td>
                                         <div class="flex gap-4">
                                             <button onclick="openUserModal(${i})" class="opacity-40 hover:opacity-100 text-white"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
@@ -574,9 +551,9 @@
                 <div class="flex flex-col gap-4">
                     <input type="text" id="m-name" placeholder="Nombre completo" class="input-apple" value="${c?.name || ''}">
                     <input type="date" id="m-dob" class="input-apple" value="${c?.dob || ''}">
-                    <input type="tel" id="m-phone" maxlength="10" placeholder="Teléfono (10 dígitos)" class="input-apple" value="${c?.phone || ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                    <button onclick="saveUser(${i})" class="btn-apple mt-4 w-full justify-center text-black font-bold tracking-tight">${c ? 'Guardar Cambios' : 'Crear Usuario y Generar ID'}</button>
-                    <div id="id-display" class="hidden mt-6 p-4 glass bg-white/5 border border-white/10 flex justify-between items-center text-white">
+                    <input type="tel" id="m-phone" maxlength="10" placeholder="Teléfono" class="input-apple" value="${c?.phone || ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    <button onclick="saveUser(${i})" class="btn-apple mt-4 w-full text-black font-bold tracking-tight">${c ? 'Guardar Cambios' : 'Crear Usuario'}</button>
+                    <div id="id-display" class="hidden mt-6 p-4 glass bg-white/5 border border-white/10 flex justify-between items-center">
                         <span id="new-id" class="font-mono text-green-400 font-bold"></span>
                         <button onclick="copyToClipboard(document.getElementById('new-id').innerText)"><i data-lucide="copy" class="opacity-60"></i></button>
                     </div>
@@ -589,11 +566,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <div onclick="openCardModal()" class="glass-card aspect-[2/3] flex flex-col items-center justify-center cursor-pointer border-dashed border-2 text-white/30"><i data-lucide="plus" class="w-12 h-12 mb-2"></i><span>Agregar Carta</span></div>
                     ${cards.map((c, i) => {
-                        const usedCount = window.state.db.usedCodes.filter(u => c.validCodes.includes(u.code)).length;
+                        const usedCount = window.state.db.usedCodes.filter(u => String(u.code).toUpperCase() === String(c.validCodes[0]).toUpperCase()).length; // Simplificado para demo
                         return `
                         <div onclick="openCardAuditModal('${c.id}')" class="glass-card aspect-[2/3] relative group overflow-hidden flex flex-col p-4 cursor-pointer">
-                            <div class="absolute top-3 right-3 z-10 glass bg-white/10 px-2 py-1 text-[10px] font-bold border border-white/10 text-white">${usedCount}/${c.validCodes.length}</div>
-                            <img src="${c.image}" class="w-full h-full object-cover rounded-xl" onerror="this.src='https://placehold.co/400x600?text=Card'">
+                            <div class="absolute top-3 right-3 z-10 glass bg-white/10 px-2 py-1 text-[10px] font-bold border border-white/10 text-white">${window.state.db.usedCodes.filter(u => c.validCodes.includes(u.code)).length}/${c.validCodes.length}</div>
+                            <img src="${c.image}" class="w-full h-full object-cover rounded-xl" onerror="this.src='https://placehold.co/400x600?text=Error+Link'">
                             <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-4">
                                 <button onclick="event.stopPropagation(); openCardModal(${i})" class="p-2 bg-white text-black rounded-full shadow-lg"><i data-lucide="edit-2" class="w-5 h-5"></i></button>
                                 <button onclick="event.stopPropagation(); deleteCard(${i})" class="p-2 bg-red-500 text-white rounded-full shadow-lg"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
@@ -607,7 +584,7 @@
         window.openCardAuditModal = (id) => {
             const c = window.state.db.cards.find(x => String(x.id) === String(id));
             openModal(`
-                <div class="flex items-center gap-4 mb-8 text-white"><img src="${c.image}" class="w-16 h-20 object-cover rounded shadow"><div><h2 class="text-xl font-bold">${c.name}</h2><p class="text-xs opacity-50 text-white">Auditoría (#${c.number})</p></div></div>
+                <div class="flex items-center gap-4 mb-8 text-white"><img src="${c.image}" class="w-16 h-20 object-cover rounded shadow"><div><h2 class="text-xl font-bold">${c.name}</h2><p class="text-xs opacity-50">Auditoría (#${c.number})</p></div></div>
                 <div class="grid grid-cols-2 bg-white/5 p-4 rounded-t-xl text-[10px] font-bold uppercase tracking-widest opacity-40 border-b border-white/10 text-white"><div>Código</div><div>Usuario</div></div>
                 <div class="flex flex-col glass bg-white/5 rounded-b-xl max-h-80 overflow-y-auto text-white">
                     ${c.validCodes.map(code => {
@@ -624,9 +601,9 @@
                 <div class="flex flex-col gap-4">
                     <input type="text" id="c-name" placeholder="Nombre" class="input-apple" value="${c?.name || ''}">
                     <input type="number" id="c-num" placeholder="Número" class="input-apple" value="${c?.number || ''}">
-                    <input type="text" id="c-url" placeholder="URL Imagen" class="input-apple" value="${c?.image || ''}">
-                    <textarea id="c-codes" placeholder="Códigos válidos (uno por línea)" class="input-apple h-24 uppercase font-mono text-xs tracking-widest">${c?.validCodes?.join('\n') || ''}</textarea>
-                    <button onclick="saveCard(${i})" class="btn-apple mt-4 justify-center w-full font-bold text-black tracking-tight">Guardar Carta</button>
+                    <input type="text" id="c-url" placeholder="URL de la imagen" class="input-apple" value="${c?.image || ''}">
+                    <textarea id="c-codes" placeholder="Códigos (uno por línea)" class="input-apple h-24 uppercase font-mono text-xs">${c?.validCodes?.join('\n') || ''}</textarea>
+                    <button onclick="saveCard(${i})" class="btn-apple mt-4 w-full text-black font-bold tracking-tight">Guardar Carta</button>
                 </div>`);
         };
 
@@ -636,9 +613,9 @@
                     <div onclick="openGiftModal()" class="glass-card p-8 flex flex-col items-center justify-center cursor-pointer border-dashed border-2 text-white/30 min-h-[160px]"><i data-lucide="plus" class="w-12 h-12 mb-2"></i><span>Nuevo Regalo</span></div>
                     ${window.state.db.gifts.map((g, i) => `
                         <div class="glass-card p-6 flex flex-col text-white">
-                            <img src="${g.image}" class="w-full h-32 object-cover rounded-xl mb-4" onerror="this.src='https://placehold.co/400x200?text=Gift'">
-                            <div class="flex justify-between items-start"><h3 class="font-bold text-white">${g.name}</h3><div class="flex gap-2"><button onclick="openGiftModal(${i})" class="opacity-40 hover:opacity-100"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="deleteGift(${i})" class="text-red-500 opacity-40 hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div>
-                            <p class="text-xs mt-1 opacity-50">Stock: ${g.stock} unidades</p>
+                            <img src="${g.image}" class="w-full h-32 object-cover rounded-xl mb-4" onerror="this.src='https://placehold.co/400x200?text=No+Img'">
+                            <div class="flex justify-between items-start"><h3 class="font-bold">${g.name}</h3><div class="flex gap-2"><button onclick="openGiftModal(${i})" class="opacity-40 hover:opacity-100"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="deleteGift(${i})" class="text-red-500 opacity-40 hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div>
+                            <p class="text-xs mt-1 opacity-50">Stock: ${g.stock}</p>
                         </div>`).join('')}
                 </div>`;
         };
@@ -646,12 +623,12 @@
         window.openGiftModal = (i = null) => {
             const g = i !== null ? window.state.db.gifts[i] : null;
             openModal(`
-                <h2 class="text-2xl font-bold mb-6 text-white text-white">Regalo</h2>
+                <h2 class="text-2xl font-bold mb-6 text-white">Regalo</h2>
                 <div class="flex flex-col gap-4">
                     <input type="text" id="g-name" placeholder="Nombre" class="input-apple" value="${g?.name || ''}">
-                    <input type="text" id="g-url" placeholder="URL Imagen" class="input-apple" value="${g?.image || ''}">
+                    <input type="text" id="g-url" placeholder="URL de la imagen" class="input-apple" value="${g?.image || ''}">
                     <input type="number" id="g-stock" placeholder="Stock" class="input-apple" value="${g?.stock || ''}">
-                    <button onclick="saveGift(${i})" class="btn-apple mt-4 justify-center w-full text-black font-bold tracking-tight">Guardar</button>
+                    <button onclick="saveGift(${i})" class="btn-apple mt-4 w-full text-black font-bold">Guardar</button>
                 </div>`);
         };
 
@@ -659,7 +636,7 @@
         const renderClient = (container) => {
             if (slideshowTimer) clearInterval(slideshowTimer);
             if (!window.state.loggedUser) {
-                container.innerHTML = `<div class="max-w-md mx-auto glass p-12 text-center fade-in text-white"><h1 class="text-3xl font-bold mb-8 italic tracking-tight">Miaurot</h1><p class="opacity-60 mb-8 text-sm">Ingresa tu ID de usuario para ver tu progreso.</p><input type="text" id="login-id" placeholder="EBSCFXXXXXXXXXX" class="input-apple w-full text-center font-mono uppercase tracking-widest mb-6"><button onclick="handleLogin()" class="btn-apple w-full justify-center text-black font-bold tracking-tight">Ingresar</button></div>`;
+                container.innerHTML = `<div class="max-w-md mx-auto glass p-12 text-center fade-in text-white"><h1 class="text-3xl font-bold mb-8 italic tracking-tight">Miaurot</h1><p class="opacity-60 mb-8 text-sm text-white/60">Ingresa tu ID de usuario para ver tu progreso.</p><input type="text" id="login-id" placeholder="EBSCFXXXXXXXXXX" class="input-apple w-full text-center font-mono uppercase tracking-widest mb-6"><button onclick="handleLogin()" class="btn-apple w-full justify-center text-black font-bold tracking-tight">Ingresar</button></div>`;
                 return;
             }
             container.innerHTML = `
@@ -705,13 +682,18 @@
                         <div class="glass-card p-4 w-64 rotate-3"><img id="slideshow-img" src="${availableCards.length > 0 ? availableCards[0].image : ''}" class="w-full aspect-[2/3] object-cover rounded-lg shadow-2xl transition-opacity duration-500"></div>
                     </div>
                 </div>`;
+            
             if (availableCards.length > 1) {
                 currentSlideshowIndex = 0;
                 slideshowTimer = setInterval(() => {
-                    if (window.state.db.cards.length === 0) return;
-                    currentSlideshowIndex = (currentSlideshowIndex + 1) % window.state.db.cards.length;
+                    const cards = window.state.db.cards;
+                    if (cards.length === 0) return;
+                    currentSlideshowIndex = (currentSlideshowIndex + 1) % cards.length;
                     const img = document.getElementById('slideshow-img');
-                    if (img) { img.style.opacity = '0'; setTimeout(() => { if(img) { img.src = window.state.db.cards[currentSlideshowIndex].image; img.style.opacity = '1'; } }, 500); }
+                    if (img && cards[currentSlideshowIndex]) { 
+                        img.style.opacity = '0'; 
+                        setTimeout(() => { if(img) { img.src = cards[currentSlideshowIndex].image; img.style.opacity = '1'; } }, 500); 
+                    }
                 }, 5000);
             }
         };
@@ -740,7 +722,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 text-white">
                     ${window.state.db.gifts.map((g, i) => `
                         <div class="glass-card overflow-hidden group cursor-pointer" onclick="claimGift(${i})">
-                            <div class="h-48 overflow-hidden text-white"><img src="${g.image}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700"></div>
+                            <div class="h-48 overflow-hidden text-white"><img src="${g.image}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='https://placehold.co/400x200?text=No+Link'"></div>
                             <div class="p-6">
                                 <h3 class="text-xl font-bold mb-2">${g.name}</h3>
                                 <div class="flex justify-between items-center"><span class="text-xs opacity-50">Stock: ${g.stock}</span><button class="px-4 py-2 rounded-lg text-xs font-bold uppercase ${ready && g.stock > 0 ? 'bg-white text-black' : 'bg-white/10 text-white/30'}">Reclamar (5)</button></div>
