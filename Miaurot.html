@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>miaurot | Apple Style Experience</title>
+    <title>Miaurot | Apple Style Experience</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -220,7 +220,7 @@
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- FIREBASE CONFIG ---
+        // --- FIREBASE CONFIG (Github Direct Version) ---
         const firebaseConfig = {
             apiKey: "AIzaSyCRSUezzXCAOo33o5Q49VeWMhPqNpZBCfM",
             authDomain: "miaurot-cards-elbalamshop.firebaseapp.com",
@@ -541,7 +541,7 @@
                                         <td>
                                             <div class="flex items-center gap-2">
                                                 <div class="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden"><div class="h-full bg-white transition-all duration-500" style="width: ${((c.activeSlots?.length || 0)/5)*100}%"></div></div>
-                                                <span class="text-xs font-bold">${c.activeSlots?.length || 0}/5</span>
+                                                <span class="text-xs font-bold text-white/50">${c.activeSlots?.length || 0}/5</span>
                                             </div>
                                         </td>
                                         <td>
@@ -588,7 +588,7 @@
                         return `
                         <div onclick="openCardAuditModal('${c.id}')" class="glass-card aspect-[2/3] relative group overflow-hidden flex flex-col p-4 cursor-pointer">
                             <div class="absolute top-3 right-3 z-10 glass bg-white/10 px-2 py-1 text-[10px] font-bold border border-white/10 text-white">${usedInThisCard}/${c.validCodes.length}</div>
-                            <img src="${c.image}" class="w-full h-full object-cover rounded-xl" onerror="this.src='https://placehold.co/400x600?text=Link+Invalido'">
+                            <img src="${c.image}" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded-xl" onerror="this.src='https://placehold.co/400x600?text=Link+Invalido'">
                             <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-4">
                                 <button onclick="event.stopPropagation(); openCardModal(${i})" class="p-2 bg-white text-black rounded-full shadow-lg"><i data-lucide="edit-2" class="w-5 h-5"></i></button>
                                 <button onclick="event.stopPropagation(); deleteCard(${i})" class="p-2 bg-red-500 text-white rounded-full shadow-lg"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
@@ -602,7 +602,7 @@
         window.openCardAuditModal = (id) => {
             const c = window.state.db.cards.find(x => String(x.id) === String(id));
             openModal(`
-                <div class="flex items-center gap-4 mb-8 text-white"><img src="${c.image}" class="w-16 h-20 object-cover rounded shadow"><div><h2 class="text-xl font-bold">${c.name}</h2><p class="text-xs opacity-50">Auditoría (#${c.number})</p></div></div>
+                <div class="flex items-center gap-4 mb-8 text-white"><img src="${c.image}" referrerpolicy="no-referrer" class="w-16 h-20 object-cover rounded shadow"><div><h2 class="text-xl font-bold">${c.name}</h2><p class="text-xs opacity-50">Auditoría (#${c.number})</p></div></div>
                 <div class="grid grid-cols-2 bg-white/5 p-4 rounded-t-xl text-[10px] font-bold uppercase tracking-widest opacity-40 border-b border-white/10 text-white"><div>Código</div><div>Usuario</div></div>
                 <div class="flex flex-col glass bg-white/5 rounded-b-xl max-h-80 overflow-y-auto text-white">
                     ${c.validCodes.map(code => {
@@ -631,7 +631,7 @@
                     <div onclick="openGiftModal()" class="glass-card p-8 flex flex-col items-center justify-center cursor-pointer border-dashed border-2 text-white/30 min-h-[160px]"><i data-lucide="plus" class="w-12 h-12 mb-2"></i><span>Nuevo Regalo</span></div>
                     ${window.state.db.gifts.map((g, i) => `
                         <div class="glass-card p-6 flex flex-col text-white">
-                            <img src="${g.image}" class="w-full h-32 object-cover rounded-xl mb-4" onerror="this.src='https://placehold.co/400x200?text=Imagen+Invalida'">
+                            <img src="${g.image}" referrerpolicy="no-referrer" class="w-full h-32 object-cover rounded-xl mb-4" onerror="this.src='https://placehold.co/400x200?text=Imagen+Invalida'">
                             <div class="flex justify-between items-start"><h3 class="font-bold text-white">${g.name}</h3><div class="flex gap-2"><button onclick="openGiftModal(${i})" class="opacity-40 hover:opacity-100"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="deleteGift(${i})" class="text-red-500 opacity-40 hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div>
                             <p class="text-xs mt-1 opacity-50">Stock: ${g.stock}</p>
                         </div>`).join('')}
@@ -679,7 +679,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-white">
                     <div>
                         <h2 class="text-4xl font-bold mb-4">Hola, ${window.state.loggedUser.name.split(' ')[0]}</h2>
-                        <p class="text-lg opacity-70 mb-8 leading-relaxed italic">
+                        <p class="text-lg opacity-70 mb-8 leading-relaxed italic text-white/80">
                             "Miaurot" es un ecosistema exclusivo diseñado para recompensar tu fidelidad. 
                             Cada compra te otorga códigos especiales que puedes transformar en cartas únicas. 
                             Colecciónalas y canjea tus logros por regalos diseñados para ti.
@@ -688,7 +688,7 @@
                             ${Array(5).fill(0).map((_, i) => {
                                 const slotId = window.state.loggedUser.activeSlots?.[i]?.id;
                                 const fresh = slotId ? window.state.db.cards.find(x => String(x.id) === String(slotId)) : null;
-                                return `<div class="w-full aspect-[2/3] glass-card flex items-center justify-center border border-white/10 overflow-hidden">${fresh ? `<img src="${fresh.image}" class="w-full h-full object-cover">` : '<i data-lucide="sparkles" class="opacity-10 text-white"></i>'}</div>`;
+                                return `<div class="w-full aspect-[2/3] glass-card flex items-center justify-center border border-white/10 overflow-hidden">${fresh ? `<img src="${fresh.image}" referrerpolicy="no-referrer" class="w-full h-full object-cover">` : '<i data-lucide="sparkles" class="opacity-10 text-white"></i>'}</div>`;
                             }).join('')}
                         </div>
                         <div class="flex gap-4">
@@ -697,7 +697,7 @@
                         ${(window.state.loggedUser.activeSlots || []).length === 5 ? '<p class="mt-4 text-green-400 font-bold fade-in">¡Completado! Ve a la pestaña de Regalos.</p>' : ''}
                     </div>
                     <div class="hidden md:flex flex-col items-center justify-center">
-                        <div class="glass-card p-4 w-64 rotate-3"><img id="slideshow-img" src="${availableCards.length > 0 ? availableCards[0].image : ''}" class="w-full aspect-[2/3] object-cover rounded-lg shadow-2xl transition-opacity duration-500"></div>
+                        <div class="glass-card p-4 w-64 rotate-3"><img id="slideshow-img" src="${availableCards.length > 0 ? availableCards[0].image : ''}" referrerpolicy="no-referrer" class="w-full aspect-[2/3] object-cover rounded-lg shadow-2xl transition-opacity duration-500"></div>
                     </div>
                 </div>`;
             
@@ -729,7 +729,7 @@
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6">
                     ${cards.map(c => {
                         const owned = ownedIds.includes(String(c.id));
-                        return `<div><div class="glass-card aspect-[2/3] overflow-hidden mb-2 ${owned ? '' : 'card-locked'}"><img src="${c.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x600?text=Error'"></div><p class="text-[10px] text-center opacity-40 uppercase tracking-widest text-white">#${c.number} ${c.name}</p></div>`;
+                        return `<div><div class="glass-card aspect-[2/3] overflow-hidden mb-2 ${owned ? '' : 'card-locked'}"><img src="${c.image}" referrerpolicy="no-referrer" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x600?text=Card'"></div><p class="text-[10px] text-center opacity-40 uppercase tracking-widest text-white">#${c.number} ${c.name}</p></div>`;
                     }).join('')}
                 </div>`;
         };
@@ -740,10 +740,10 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 text-white">
                     ${window.state.db.gifts.map((g, i) => `
                         <div class="glass-card overflow-hidden group cursor-pointer" onclick="claimGift(${i})">
-                            <div class="h-48 overflow-hidden text-white"><img src="${g.image}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='https://placehold.co/400x200?text=No+Img'"></div>
+                            <div class="h-48 overflow-hidden text-white"><img src="${g.image}" referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='https://placehold.co/400x200?text=No+Link'"></div>
                             <div class="p-6">
-                                <h3 class="text-xl font-bold mb-2">${g.name}</h3>
-                                <div class="flex justify-between items-center"><span class="text-xs opacity-50">Stock: ${g.stock}</span><button class="px-4 py-2 rounded-lg text-xs font-bold uppercase ${ready && g.stock > 0 ? 'bg-white text-black' : 'bg-white/10 text-white/30'}">Reclamar (5)</button></div>
+                                <h3 class="text-xl font-bold mb-2 text-white">${g.name}</h3>
+                                <div class="flex justify-between items-center"><span class="text-xs opacity-50 text-white">Stock: ${g.stock}</span><button class="px-4 py-2 rounded-lg text-xs font-bold uppercase ${ready && g.stock > 0 ? 'bg-white text-black' : 'bg-white/10 text-white/30'}">Reclamar (5)</button></div>
                             </div>
                         </div>`).join('')}
                 </div>`;
