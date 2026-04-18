@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Miaurot | Apple Style Experience</title>
+    <title>miaurot | Apple Style Experience</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -190,7 +190,7 @@
 
     <main id="main-content" class="flex-grow container mx-auto px-6 py-8">
         <div class="flex items-center justify-center h-full py-20 opacity-20 text-white">
-            <div class="text-xl">Conectando con Miaurot Cloud...</div>
+            <div class="text-xl text-center">Conectando con Miaurot Cloud...</div>
         </div>
     </main>
 
@@ -382,7 +382,7 @@
             const number = parseInt(document.getElementById('c-num').value);
             const image = document.getElementById('c-url').value;
             const validCodes = document.getElementById('c-codes').value.split('\n').map(x => x.trim().toUpperCase()).filter(x => x);
-            if(!name || !number || !image) { window.showToast("Faltan datos", "error"); return; }
+            if(!name || !number || !image) { window.showToast("Faltan datos de la carta", "error"); return; }
             
             const cardId = index !== null ? window.state.db.cards[index].id : Date.now().toString();
             await setDoc(doc(db, `artifacts/${appId}/public/data/cards/${cardId}`), { name, number, image, validCodes });
@@ -446,7 +446,7 @@
             
             const card = window.state.db.cards.find(c => c.validCodes.includes(code));
             if(card) {
-                if((window.state.loggedUser.activeSlots || []).length >= 5) { window.showToast("Slots llenos", "error"); return; }
+                if((window.state.loggedUser.activeSlots || []).length >= 5) { window.showToast("¡Tus 5 slots ya están llenos!", "error"); return; }
                 
                 const updatedUser = { ...window.state.loggedUser };
                 if (!updatedUser.activeSlots) updatedUser.activeSlots = [];
@@ -484,6 +484,16 @@
             });
         };
 
+        // --- HELPERS ---
+        const generateClientID = (name, dob) => {
+            const date = new Date(dob);
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const initials = name.split(' ').map(n => n[0] || '').join('').toUpperCase();
+            const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+            return `EBSCF${month}${day}${initials}${random}`;
+        };
+
         // --- RENDER LOGIC ---
         const render = () => {
             const main = document.getElementById('main-content');
@@ -519,26 +529,34 @@
                 </div>
                 <div class="overflow-x-auto">
                     <table class="client-table">
-                        <thead><tr><th>Nombre / ID</th><th>Contacto</th><th>Progreso</th><th>Acción</th></tr></thead>
+                        <thead><tr><th>Nombre / ID</th><th>Contacto</th><th>Progreso</th><th>Estado</th><th>Acción</th></tr></thead>
                         <tbody>
-                            ${window.state.db.clients.length === 0 ? '<tr><td colspan="4" class="text-center opacity-30 py-12">No hay datos.</td></tr>' : 
-                                window.state.db.clients.map((c, i) => `
-                                <tr>
-                                    <td><div class="font-medium text-white">${c.name}</div><div class="text-[10px] font-mono opacity-40">${c.id}</div></td>
-                                    <td class="text-sm opacity-70 text-white">${c.phone}</td>
-                                    <td>
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden"><div class="h-full bg-white" style="width: ${((c.activeSlots?.length || 0)/5)*100}%"></div></div>
-                                            <span class="text-xs font-bold">${c.activeSlots?.length || 0}/5</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="flex gap-4">
-                                            <button onclick="openUserModal(${i})" class="opacity-40 hover:opacity-100 text-white"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                                            <button onclick="deleteClient(${i})" class="text-red-500 opacity-40 hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>`).join('')}
+                            ${window.state.db.clients.length === 0 ? '<tr><td colspan="5" class="text-center opacity-30 py-12">Cargando base de datos...</td></tr>' : 
+                                window.state.db.clients.map((c, i) => {
+                                    const ready = (c.activeSlots?.length || 0) === 5;
+                                    return `
+                                    <tr>
+                                        <td><div class="font-medium text-white">${c.name}</div><div class="text-[10px] font-mono opacity-40">${c.id}</div></td>
+                                        <td class="text-sm opacity-70 text-white">${c.phone}</td>
+                                        <td>
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden"><div class="h-full bg-white transition-all duration-500" style="width: ${((c.activeSlots?.length || 0)/5)*100}%"></div></div>
+                                                <span class="text-xs font-bold">${c.activeSlots?.length || 0}/5</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            ${ready ? 
+                                                '<span class="text-[10px] bg-green-500/20 text-green-400 px-2 py-1 rounded-full border border-green-500/30 font-bold uppercase tracking-wider">Regalo Listo</span>' : 
+                                                '<span class="text-[10px] bg-white/5 text-white/40 px-2 py-1 rounded-full border border-white/10 font-bold uppercase tracking-wider">Coleccionando</span>'}
+                                        </td>
+                                        <td>
+                                            <div class="flex gap-4">
+                                                <button onclick="openUserModal(${i})" class="opacity-40 hover:opacity-100 text-white"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                                <button onclick="deleteClient(${i})" class="text-red-500 opacity-40 hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>`
+                                }).join('')}
                         </tbody>
                     </table>
                 </div>`;
@@ -566,11 +584,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <div onclick="openCardModal()" class="glass-card aspect-[2/3] flex flex-col items-center justify-center cursor-pointer border-dashed border-2 text-white/30"><i data-lucide="plus" class="w-12 h-12 mb-2"></i><span>Agregar Carta</span></div>
                     ${cards.map((c, i) => {
-                        const usedCount = window.state.db.usedCodes.filter(u => String(u.code).toUpperCase() === String(c.validCodes[0]).toUpperCase()).length; // Simplificado para demo
+                        const usedInThisCard = window.state.db.usedCodes.filter(u => c.validCodes.includes(u.code)).length;
                         return `
                         <div onclick="openCardAuditModal('${c.id}')" class="glass-card aspect-[2/3] relative group overflow-hidden flex flex-col p-4 cursor-pointer">
-                            <div class="absolute top-3 right-3 z-10 glass bg-white/10 px-2 py-1 text-[10px] font-bold border border-white/10 text-white">${window.state.db.usedCodes.filter(u => c.validCodes.includes(u.code)).length}/${c.validCodes.length}</div>
-                            <img src="${c.image}" class="w-full h-full object-cover rounded-xl" onerror="this.src='https://placehold.co/400x600?text=Error+Link'">
+                            <div class="absolute top-3 right-3 z-10 glass bg-white/10 px-2 py-1 text-[10px] font-bold border border-white/10 text-white">${usedInThisCard}/${c.validCodes.length}</div>
+                            <img src="${c.image}" class="w-full h-full object-cover rounded-xl" onerror="this.src='https://placehold.co/400x600?text=Link+Invalido'">
                             <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-4">
                                 <button onclick="event.stopPropagation(); openCardModal(${i})" class="p-2 bg-white text-black rounded-full shadow-lg"><i data-lucide="edit-2" class="w-5 h-5"></i></button>
                                 <button onclick="event.stopPropagation(); deleteCard(${i})" class="p-2 bg-red-500 text-white rounded-full shadow-lg"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
@@ -602,7 +620,7 @@
                     <input type="text" id="c-name" placeholder="Nombre" class="input-apple" value="${c?.name || ''}">
                     <input type="number" id="c-num" placeholder="Número" class="input-apple" value="${c?.number || ''}">
                     <input type="text" id="c-url" placeholder="URL de la imagen" class="input-apple" value="${c?.image || ''}">
-                    <textarea id="c-codes" placeholder="Códigos (uno por línea)" class="input-apple h-24 uppercase font-mono text-xs">${c?.validCodes?.join('\n') || ''}</textarea>
+                    <textarea id="c-codes" placeholder="Códigos (uno por línea)" class="input-apple h-24 uppercase font-mono text-xs tracking-widest">${c?.validCodes?.join('\n') || ''}</textarea>
                     <button onclick="saveCard(${i})" class="btn-apple mt-4 w-full text-black font-bold tracking-tight">Guardar Carta</button>
                 </div>`);
         };
@@ -613,8 +631,8 @@
                     <div onclick="openGiftModal()" class="glass-card p-8 flex flex-col items-center justify-center cursor-pointer border-dashed border-2 text-white/30 min-h-[160px]"><i data-lucide="plus" class="w-12 h-12 mb-2"></i><span>Nuevo Regalo</span></div>
                     ${window.state.db.gifts.map((g, i) => `
                         <div class="glass-card p-6 flex flex-col text-white">
-                            <img src="${g.image}" class="w-full h-32 object-cover rounded-xl mb-4" onerror="this.src='https://placehold.co/400x200?text=No+Img'">
-                            <div class="flex justify-between items-start"><h3 class="font-bold">${g.name}</h3><div class="flex gap-2"><button onclick="openGiftModal(${i})" class="opacity-40 hover:opacity-100"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="deleteGift(${i})" class="text-red-500 opacity-40 hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div>
+                            <img src="${g.image}" class="w-full h-32 object-cover rounded-xl mb-4" onerror="this.src='https://placehold.co/400x200?text=Imagen+Invalida'">
+                            <div class="flex justify-between items-start"><h3 class="font-bold text-white">${g.name}</h3><div class="flex gap-2"><button onclick="openGiftModal(${i})" class="opacity-40 hover:opacity-100"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="deleteGift(${i})" class="text-red-500 opacity-40 hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div>
                             <p class="text-xs mt-1 opacity-50">Stock: ${g.stock}</p>
                         </div>`).join('')}
                 </div>`;
@@ -623,7 +641,7 @@
         window.openGiftModal = (i = null) => {
             const g = i !== null ? window.state.db.gifts[i] : null;
             openModal(`
-                <h2 class="text-2xl font-bold mb-6 text-white">Regalo</h2>
+                <h2 class="text-2xl font-bold mb-6 text-white text-white">Regalo</h2>
                 <div class="flex flex-col gap-4">
                     <input type="text" id="g-name" placeholder="Nombre" class="input-apple" value="${g?.name || ''}">
                     <input type="text" id="g-url" placeholder="URL de la imagen" class="input-apple" value="${g?.image || ''}">
@@ -711,7 +729,7 @@
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6">
                     ${cards.map(c => {
                         const owned = ownedIds.includes(String(c.id));
-                        return `<div><div class="glass-card aspect-[2/3] overflow-hidden mb-2 ${owned ? '' : 'card-locked'}"><img src="${c.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x600?text=Card'"></div><p class="text-[10px] text-center opacity-40 uppercase tracking-widest text-white">#${c.number} ${c.name}</p></div>`;
+                        return `<div><div class="glass-card aspect-[2/3] overflow-hidden mb-2 ${owned ? '' : 'card-locked'}"><img src="${c.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x600?text=Error'"></div><p class="text-[10px] text-center opacity-40 uppercase tracking-widest text-white">#${c.number} ${c.name}</p></div>`;
                     }).join('')}
                 </div>`;
         };
@@ -722,7 +740,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 text-white">
                     ${window.state.db.gifts.map((g, i) => `
                         <div class="glass-card overflow-hidden group cursor-pointer" onclick="claimGift(${i})">
-                            <div class="h-48 overflow-hidden text-white"><img src="${g.image}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='https://placehold.co/400x200?text=No+Link'"></div>
+                            <div class="h-48 overflow-hidden text-white"><img src="${g.image}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='https://placehold.co/400x200?text=No+Img'"></div>
                             <div class="p-6">
                                 <h3 class="text-xl font-bold mb-2">${g.name}</h3>
                                 <div class="flex justify-between items-center"><span class="text-xs opacity-50">Stock: ${g.stock}</span><button class="px-4 py-2 rounded-lg text-xs font-bold uppercase ${ready && g.stock > 0 ? 'bg-white text-black' : 'bg-white/10 text-white/30'}">Reclamar (5)</button></div>
