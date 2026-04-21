@@ -40,12 +40,16 @@
     </main>
 
     <footer class="mt-auto py-12 px-6 border-t border-white/10 glass mx-4 mb-4 rounded-3xl text-white opacity-40 text-sm text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
-        <div>© 2024 ElBalam Shop. Todos los derechos reservados.</div>
+        <div>© 2026 ElBalam Shop. Todos los derechos reservados.</div>
         <div class="flex gap-6"><a href="#">Privacidad</a><a href="#">Términos</a></div>
     </footer>
 
-    <div id="modal-container" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden items-center justify-center p-6">
-        <div class="glass w-full max-w-lg p-8 fade-in relative max-h-[90vh] overflow-y-auto"><button onclick="closeModal()" class="absolute top-4 right-4 text-white/50 hover:text-white"><i data-lucide="x"></i></button><div id="modal-content"></div></div>
+    <!-- Ajuste: Añadida clase 'flex' para permitir el centrado -->
+    <div id="modal-container" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-6">
+        <div class="glass w-full max-w-lg p-8 fade-in relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-white/50 hover:text-white"><i data-lucide="x"></i></button>
+            <div id="modal-content"></div>
+        </div>
     </div>
 
     <script type="module">
